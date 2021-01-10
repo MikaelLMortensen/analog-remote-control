@@ -9,9 +9,9 @@ basic.showIcon(IconNames.Tortoise)
 input.onButtonPressed(Button.AB, function () {
     leftForward = true
     rightForward = true
-    showSpeedInfo()
     sendLeftSpeed()
     sendRightSpeed()
+    showSpeedInfo()
 })
 
 input.onButtonPressed(Button.A, function () {
@@ -107,4 +107,5 @@ basic.forever(function () {
         oldVoltageRight = voltageRight
     }
     showSpeedInfo()
+    basic.pause(200)
 })
