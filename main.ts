@@ -1,44 +1,63 @@
-/*
-    lf : Left Forward - Boolean
-    rf : Right Forward - Boolean
-    lf : Left Speed (0 - 1023)
-    rf : Right Speed (0 - 1023)
-*/
-let speedStruct = { lf : true, rf:true, ls:0, rs:0 }
+let leftForward = true
+let rightForward = true
+let voltageLeft = 0
+let voltageRight = 0
+
 radio.setGroup(20)
+basic.showIcon(IconNames.Tortoise)
 
 input.onButtonPressed(Button.AB, function () {
-    radio.sendValue("lf", 1)
-    radio.sendValue("rf", 1)
+    leftForward = true
+    rightForward = true
     showSpeedInfo()
+    sendLeftSpeed()
+    sendRightSpeed()
 })
 
 input.onButtonPressed(Button.A, function () {
-    speedStruct.lf = !speedStruct.lf
-    if (speedStruct.lf) {
-        radio.sendValue("lf", 1)
-    } else {
-        radio.sendValue("lf", 0)
-    }
+    leftForward = !leftForward
+    sendLeftSpeed()
     showSpeedInfo()
 })
 
 input.onButtonPressed(Button.B, function () {
-    speedStruct.rf = !speedStruct.rf
-    if (speedStruct.rf) {
-        radio.sendValue("rf", 1)
-    } else {
-        radio.sendValue("rf", 0)
-    }
+    rightForward = !rightForward
+    sendRightSpeed()
     showSpeedInfo()
 })
 
+function sendLeftSpeed() {
+    let speed = 0
+    if (voltageLeft > 5) {
+        // convert voltage to percent 1023 => 100
+        speed = Math.floor(voltageLeft / 10.2)
+        // reverse is negative
+        if (!leftForward){
+            speed = speed * -1
+        }
+    }
+    radio.sendValue("ls", speed)
+}
+
+function sendRightSpeed() {
+    let speed = 0
+    if (voltageRight > 5) {
+        // convert voltage to percent 1023 => 100
+        speed = Math.floor(voltageRight / 10.2)
+        // reverse is negative
+        if (!rightForward) {
+            speed = speed * -1
+        }
+    }
+    radio.sendValue("rs", speed)
+}
+
 function showSpeedInfo(){
-    if (speedStruct.ls < 5 && speedStruct.rs < 5) {
+    if (voltageLeft < 5 && voltageRight < 5) {
         basic.clearScreen()
         return
     }
-    if (speedStruct.lf && speedStruct.rf) {
+    if (leftForward && rightForward) {
         basic.plotLeds(`
         . # . # .
         # # # # #
@@ -46,7 +65,7 @@ function showSpeedInfo(){
         . . . . .
         . . . . .
         `) 
-    } else if (!speedStruct.lf && !speedStruct.rf) {
+    } else if (!leftForward && !rightForward) {
         basic.plotLeds(`
         . . . . .
         . . . . .
@@ -54,7 +73,7 @@ function showSpeedInfo(){
         # # # # #
         . # . # .
         `) 
-    } else if (speedStruct.lf && !speedStruct.rf) {
+    } else if (leftForward && !rightForward) {
         basic.plotLeds(`
         . # . . .
         # # # . .
@@ -74,17 +93,18 @@ function showSpeedInfo(){
 }
 
 basic.forever(function () {
-    let oldVoltageP1 = 0
-    let oldVoltageP2 = 0
+    let oldVoltageLeft = 0
+    let oldVoltageRight = 0
 
-	let voltageP1 = pins.analogReadPin(AnalogPin.P1)
-    let voltageP2 = pins.analogReadPin(AnalogPin.P2)
-    if (voltageP1 != oldVoltageP1) {
-        radio.sendValue("ls", voltageP1)
-        oldVoltageP1 = voltageP1
+	voltageLeft = pins.analogReadPin(AnalogPin.P1)
+    voltageRight = pins.analogReadPin(AnalogPin.P2)
+    if (voltageLeft != oldVoltageLeft) {
+        sendLeftSpeed()
+        oldVoltageLeft = voltageLeft
     } 
-    if (voltageP2 != oldVoltageP2) {
-        radio.sendValue("rs", voltageP2)
-        oldVoltageP2 = voltageP2
+    if (voltageRight != oldVoltageRight) {
+        sendRightSpeed()
+        oldVoltageRight = voltageRight
     }
+    showSpeedInfo()
 })
