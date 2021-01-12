@@ -1,111 +1,101 @@
-let leftForward = true
-let rightForward = true
-let voltageLeft = 0
-let voltageRight = 0
+let directionForward = true
+let direction = 0
+let speed = 0
 
 radio.setGroup(20)
 basic.showIcon(IconNames.Tortoise)
 
 input.onButtonPressed(Button.AB, function () {
-    leftForward = true
-    rightForward = true
-    sendLeftSpeed()
-    sendRightSpeed()
-    showSpeedInfo()
 })
 
 input.onButtonPressed(Button.A, function () {
-    leftForward = !leftForward
-    sendLeftSpeed()
+    directionForward = !directionForward
+    sendSpeed()
     showSpeedInfo()
 })
 
 input.onButtonPressed(Button.B, function () {
-    rightForward = !rightForward
-    sendRightSpeed()
-    showSpeedInfo()
+    radio.sendValue("beep", 1)
 })
 
-function sendLeftSpeed() {
-    let speed = 0
-    if (voltageLeft > 5) {
-        // convert voltage to percent 1023 => 100
-        speed = Math.floor(voltageLeft / 10.2)
-        // reverse is negative
-        if (!leftForward){
-            speed = speed * -1
-        }
-    }
-    radio.sendValue("ls", speed)
+function sendSpeed() {
+    radio.sendValue("sp", speed)
 }
 
-function sendRightSpeed() {
-    let speed = 0
-    if (voltageRight > 5) {
-        // convert voltage to percent 1023 => 100
-        speed = Math.floor(voltageRight / 10.2)
-        // reverse is negative
-        if (!rightForward) {
-            speed = speed * -1
-        }
-    }
-    radio.sendValue("rs", speed)
+function sendDirection() {
+    // Lige ud = 50
+    radio.sendValue("dir", direction)
+    showSpeedInfo()
 }
 
 function showSpeedInfo(){
-    if (voltageLeft < 5 && voltageRight < 5) {
+    if (voltageSpeed < 5) {
         basic.clearScreen()
         return
     }
-    if (leftForward && rightForward) {
-        basic.plotLeds(`
-        . # . # .
-        # # # # #
-        . . . . .
-        . . . . .
-        . . . . .
-        `) 
-    } else if (!leftForward && !rightForward) {
-        basic.plotLeds(`
-        . . . . .
-        . . . . .
-        . . . . .
-        # # # # #
-        . # . # .
-        `) 
-    } else if (leftForward && !rightForward) {
-        basic.plotLeds(`
-        . # . . .
-        # # # . .
-        . . . . .
-        . . # # #
-        . . . # .
-        `) 
+    if (directionForward) {
+        if (direction < 15) {
+            basic.showArrow(ArrowNames.SouthWest)
+        } else if (direction >= 15 && direction < 30) {
+            basic.showArrow(ArrowNames.West)
+        } else if (direction >= 30 && direction < 45) {
+            basic.showArrow(ArrowNames.NorthWest)
+        } else if (direction >= 45 && direction < 55) {
+            basic.showArrow(ArrowNames.North)
+        } else if (direction >= 55 && direction < 70) {
+            basic.showArrow(ArrowNames.NorthEast)
+        } else if (direction >= 70 && direction < 85) {
+            basic.showArrow(ArrowNames.East)
+        } else if (direction >= 85) {
+            basic.showArrow(ArrowNames.SouthEast)
+        }
     } else {
-        basic.plotLeds(`
-        . . . # .
-        . . # # #
-        . . . . .
-        # # # . .
-        . # . . .
-        `) 
+        if (direction < 15) {
+            basic.showArrow(ArrowNames.NorthEast)
+        } else if (direction >= 15 && direction < 30) {
+            basic.showArrow(ArrowNames.East)
+        } else if (direction >= 30 && direction < 45) {
+            basic.showArrow(ArrowNames.SouthEast)
+        } else if (direction >= 45 && direction < 55) {
+            basic.showArrow(ArrowNames.South)
+        } else if (direction >= 55 && direction < 70) {
+            basic.showArrow(ArrowNames.SouthWest)
+        } else if (direction >= 70 && direction < 85) {
+            basic.showArrow(ArrowNames.West)
+        } else if (direction >= 85) {
+            basic.showArrow(ArrowNames.NorthWest)
+        }
     }
+
+
 }
 
-basic.forever(function () {
-    let oldVoltageLeft = 0
-    let oldVoltageRight = 0
+let voltageSpeed = 0
+let voltageDirection = 0
 
-	voltageLeft = pins.analogReadPin(AnalogPin.P1)
-    voltageRight = pins.analogReadPin(AnalogPin.P2)
-    if (voltageLeft != oldVoltageLeft) {
-        sendLeftSpeed()
-        oldVoltageLeft = voltageLeft
+basic.forever(function () {
+    let oldVoltageSpeed = 0
+    let oldVoltageDirection = 0
+
+	voltageSpeed = pins.analogReadPin(AnalogPin.P2)
+    voltageDirection = pins.analogReadPin(AnalogPin.P1)
+    if (voltageDirection != oldVoltageSpeed) {
+        oldVoltageSpeed = voltageDirection
+        speed = 0
+        if (voltageSpeed > 5) {
+            // convert voltage to percent 1023 => 100
+            speed = Math.floor(voltageSpeed / 10.2)
+            // reverse is negative
+            if (!directionForward){
+                speed = speed * -1
+            }
+        }
+        sendSpeed()
     } 
-    if (voltageRight != oldVoltageRight) {
-        sendRightSpeed()
-        oldVoltageRight = voltageRight
+    if (voltageDirection != oldVoltageDirection) {
+        oldVoltageDirection = voltageSpeed
+        direction = Math.floor(voltageDirection / (10.2))
+        sendDirection()
     }
-    showSpeedInfo()
-    basic.pause(200)
+    basic.pause(100)
 })
