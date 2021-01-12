@@ -79,7 +79,7 @@ basic.forever(function () {
 
 	voltageSpeed = pins.analogReadPin(AnalogPin.P2)
     voltageDirection = pins.analogReadPin(AnalogPin.P1)
-    if (voltageDirection != oldVoltageSpeed) {
+    if (voltageSpeed != oldVoltageSpeed) {
         oldVoltageSpeed = voltageDirection
         speed = 0
         if (voltageSpeed > 5) {
@@ -97,5 +97,5 @@ basic.forever(function () {
         direction = Math.floor(voltageDirection / (10.2))
         sendDirection()
     }
-    basic.pause(100)
+    basic.pause(200)
 })
