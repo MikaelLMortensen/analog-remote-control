@@ -97,5 +97,5 @@ basic.forever(function () {
         direction = Math.floor(voltageDirection / (10.2))
         sendDirection()
     }
-    basic.pause(200)
+    basic.pause(100)
 })
