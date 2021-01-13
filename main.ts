@@ -3,7 +3,7 @@ let direction = 0
 let speed = 0
 
 radio.setGroup(20)
-basic.showIcon(IconNames.Tortoise)
+basic.showArrow(ArrowNames.North)
 
 input.onButtonPressed(Button.AB, function () {
 })
@@ -11,7 +11,12 @@ input.onButtonPressed(Button.AB, function () {
 input.onButtonPressed(Button.A, function () {
     directionForward = !directionForward
     sendSpeed()
-    showSpeedInfo()
+    if (directionForward){
+        basic.showArrow(ArrowNames.North)
+    } else {
+        basic.showArrow(ArrowNames.South)
+    }
+    //showSpeedInfo()
 })
 
 input.onButtonPressed(Button.B, function () {
@@ -25,7 +30,7 @@ function sendSpeed() {
 function sendDirection() {
     // Lige ud = 50
     radio.sendValue("dir", direction)
-    showSpeedInfo()
+    //showSpeedInfo()
 }
 
 function showSpeedInfo(){
