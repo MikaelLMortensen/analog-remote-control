@@ -10,10 +10,12 @@ input.onButtonPressed(Button.AB, function () {
 
 input.onButtonPressed(Button.A, function () {
     directionForward = !directionForward
-    radio.sendValue("fw", speed)
+    sendSpeed()
     if (directionForward){
+        radio.sendValue("fw", 1)
         basic.showArrow(ArrowNames.North)
     } else {
+        radio.sendValue("fw", 0)
         basic.showArrow(ArrowNames.South)
     }
     //showSpeedInfo()
