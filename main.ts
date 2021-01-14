@@ -1,5 +1,5 @@
 let directionForward = true // Direction Flag, true = forward / false = reverse
-let heading = 0           // heading value, range: -100 - 100. 
+let heading = 0             // heading value, range: -100 - 100. 
                             // Negative values mean turn left
                             // Positive values mean turn right
 let speed = 0               // Speed value, range 0 - 100
