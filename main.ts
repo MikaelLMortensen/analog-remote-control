@@ -1,6 +1,8 @@
-let directionForward = true
-let direction = 0
-let speed = 0
+let directionForward = true // Direction Flag, true = forward / false = reverse
+let heading = 0           // heading value, range: -100 - 100. 
+                            // Negative values mean turn left
+                            // Positive values mean turn right
+let speed = 0               // Speed value, range 0 - 100
 
 radio.setGroup(20)
 basic.showArrow(ArrowNames.North)
@@ -18,93 +20,54 @@ input.onButtonPressed(Button.A, function () {
         radio.sendValue("fw", 0)
         basic.showArrow(ArrowNames.South)
     }
-    //showSpeedInfo()
 })
 
 input.onButtonPressed(Button.B, function () {
-    radio.sendValue("beep", 1)
+    radio.sendValue("info", 1)
 })
 
 function sendSpeed() {
     radio.sendValue("sp", speed)
 }
 
-function sendDirection() {
+function sendHeading() {
     // Lige ud = 0
     // Venstre = -100
     // Højre = 100
-    radio.sendValue("dir", direction)
-    //showSpeedInfo()
+    radio.sendValue("hd", heading)
 }
 
-function showSpeedInfo(){
-    if (voltageSpeed < 5) {
-        basic.clearScreen()
-        return
-    }
-    if (directionForward) {
-        if (direction < 15) {
-            basic.showArrow(ArrowNames.SouthWest)
-        } else if (direction >= 15 && direction < 30) {
-            basic.showArrow(ArrowNames.West)
-        } else if (direction >= 30 && direction < 45) {
-            basic.showArrow(ArrowNames.NorthWest)
-        } else if (direction >= 45 && direction < 55) {
-            basic.showArrow(ArrowNames.North)
-        } else if (direction >= 55 && direction < 70) {
-            basic.showArrow(ArrowNames.NorthEast)
-        } else if (direction >= 70 && direction < 85) {
-            basic.showArrow(ArrowNames.East)
-        } else if (direction >= 85) {
-            basic.showArrow(ArrowNames.SouthEast)
-        }
-    } else {
-        if (direction < 15) {
-            basic.showArrow(ArrowNames.NorthEast)
-        } else if (direction >= 15 && direction < 30) {
-            basic.showArrow(ArrowNames.East)
-        } else if (direction >= 30 && direction < 45) {
-            basic.showArrow(ArrowNames.SouthEast)
-        } else if (direction >= 45 && direction < 55) {
-            basic.showArrow(ArrowNames.South)
-        } else if (direction >= 55 && direction < 70) {
-            basic.showArrow(ArrowNames.SouthWest)
-        } else if (direction >= 70 && direction < 85) {
-            basic.showArrow(ArrowNames.West)
-        } else if (direction >= 85) {
-            basic.showArrow(ArrowNames.NorthWest)
-        }
-    }
-
-
-}
-
-let voltageSpeed = 0
-let voltageDirection = 0
+let voltageSpeed = 0      // Analog input value,    range: 0-1023
+let voltageHeading = 0    // Analog direction value,  range: 0-1023
 
 basic.forever(function () {
     let oldVoltageSpeed = 0
-    let oldVoltageDirection = 0
+    let oldVoltageHeading = 0
+    let oldSpeed = 0
+    let oldHeading = 0
 
 	voltageSpeed = pins.analogReadPin(AnalogPin.P2)
-    voltageDirection = pins.analogReadPin(AnalogPin.P1)
+    // Has speed input changed since last run
     if (voltageSpeed != oldVoltageSpeed) {
         oldVoltageSpeed = voltageSpeed
         speed = 0
+        // calculate speed (0 - 100)
         if (voltageSpeed > 5) {
             // convert voltage to percent 1023 => 100
             speed = Math.floor(voltageSpeed / 10.2)
-            // reverse is negative
-            if (!directionForward){
-                speed = speed * -1
-            }
         }
-        sendSpeed()
+        // if speed has changed we send it
+        if (speed != oldSpeed) {
+            oldSpeed = speed
+            sendSpeed()
+        }
     } 
-    if (voltageDirection != oldVoltageDirection) {
-        oldVoltageDirection = voltageDirection
-        direction = Math.floor(voltageDirection / (5.1)) - 100 // Range: -100 => 100
-        sendDirection()
+    voltageHeading = pins.analogReadPin(AnalogPin.P1)
+    // Has heading input changed since last run
+    if (voltageHeading != oldVoltageHeading) {
+        oldVoltageHeading = voltageHeading
+        heading = Math.floor(voltageHeading / (5.1)) - 100 // Range: -100 => 100
+        sendHeading()
     }
     basic.pause(100)
 })
