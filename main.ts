@@ -30,7 +30,9 @@ function sendSpeed() {
 }
 
 function sendDirection() {
-    // Lige ud = 50
+    // Lige ud = 0
+    // Venstre = -100
+    // Højre = 100
     radio.sendValue("dir", direction)
     //showSpeedInfo()
 }
@@ -87,7 +89,7 @@ basic.forever(function () {
 	voltageSpeed = pins.analogReadPin(AnalogPin.P2)
     voltageDirection = pins.analogReadPin(AnalogPin.P1)
     if (voltageSpeed != oldVoltageSpeed) {
-        oldVoltageSpeed = voltageDirection
+        oldVoltageSpeed = voltageSpeed
         speed = 0
         if (voltageSpeed > 5) {
             // convert voltage to percent 1023 => 100
@@ -100,8 +102,8 @@ basic.forever(function () {
         sendSpeed()
     } 
     if (voltageDirection != oldVoltageDirection) {
-        oldVoltageDirection = voltageSpeed
-        direction = Math.floor(voltageDirection / (10.2))
+        oldVoltageDirection = voltageDirection
+        direction = Math.floor(voltageDirection / (5.1)) - 100 // Range: -100 => 100
         sendDirection()
     }
     basic.pause(100)
